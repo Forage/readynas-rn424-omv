@@ -26,8 +26,9 @@ the data that is already on a ReadyNAS-formatted drive.
 9. [Bring in an existing ReadyNAS data drive](#9-bring-in-an-existing-readynas-data-drive)
 10. [Share it to Windows](#10-share-it-to-windows)
 11. [Front panel display and buttons](#11-front-panel-display-and-buttons)
-12. [Troubleshooting](#12-troubleshooting)
-13. [Going back to ReadyNAS OS](#13-going-back-to-readynas-os)
+12. [Fan control](#12-fan-control)
+13. [Troubleshooting](#13-troubleshooting)
+14. [Going back to ReadyNAS OS](#14-going-back-to-readynas-os)
 
 ---
 
@@ -166,7 +167,7 @@ If validation fails, suspect the DOM or the adapter, not the procedure.
 ## 6. Swap the DOM and boot
 
 1. Unplug the NAS. Open it and pull the original 256 MB DOM off the 9-pin
-   header. **Keep it safe and unmodified** – it's your way back (see §13). Copy
+   header. **Keep it safe and unmodified** – it's your way back (see §14). Copy
    its files to your PC as an extra backup.
 2. Fit the new DOM, blocked hole over the missing pin.
 3. **Leave all drive bays empty** for the first boot. Plug in Ethernet.
@@ -293,7 +294,20 @@ python3 rn424_panel.py test      # display shows "Hello! / Front panel OK"
 sh install.sh                    # systemd service
 ```
 
-## 12. Troubleshooting
+## 12. Fan control
+
+Under OMV the fan stays at the BIOS's fixed, loud speed. The fan chip is an
+ITE IT8613E, which Debian's `it87` driver doesn't support, so the community
+driver is installed first (built by DKMS, so it survives kernel updates).
+Then a small service sets the fan from the disk and CPU temperatures. See
+[`fan/README.md`](fan/README.md) for the driver commands. After that:
+
+```
+git clone -b fan-control https://github.com/dgalue/readynas-rn424-omv /root/readynas-rn424-omv
+sh /root/readynas-rn424-omv/fan/install.sh     # checks, calibrates (~3 min), starts
+```
+
+## 13. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
@@ -311,7 +325,7 @@ These boot messages are **normal** on the RN424 and can be ignored:
 `EDAC pnd2: Failed to register device with error -22`,
 `mdadm: No arrays found` (when no data disks are present).
 
-## 13. Going back to ReadyNAS OS
+## 14. Going back to ReadyNAS OS
 
 ReadyNAS OS 6 itself lives on the data disks (the `md126` root array above);
 the original DOM only boots it. Nothing in this guide touches `md126`, so

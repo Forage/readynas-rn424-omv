@@ -11,6 +11,7 @@ front display and buttons work again.
 |---|---|
 | **[GUIDE.md](GUIDE.md)** | Full step-by-step conversion: replacement USB DOM, headless install from a Windows PC, serial console, network, importing an existing ReadyNAS volume, SMB. |
 | **[panel/](panel/)** | Front-panel driver: status pages on the display, 5-way buttons, RAID/disk-full alerts. |
+| **[fan/](fan/)** | Temperature-controlled fan: driver for the IT8613E fan chip, calibration, systemd service. |
 | **[docs/PINMAP.md](docs/PINMAP.md)** | How the RN424 display pins were recovered from NETGEAR's kernel, plus the pin tables for the RN316, 42x, 516/716, 524–628. |
 | **[tools/dump_pinmap.py](tools/dump_pinmap.py)** | Prints those tables from any ReadyNAS OS 6 `kernel` file. |
 
@@ -38,6 +39,7 @@ but hasn't been tested. The panel driver also carries the RN426/RN428 pin map.
 5. Finish setup in the web UI, install omv-extras + writecache, mount the
    existing `md127` btrfs volume, share it over SMB.
 6. Install the front-panel service.
+7. Install the IT8613E fan driver and the fan-control service.
 
 ## Credits
 

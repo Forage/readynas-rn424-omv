@@ -41,7 +41,7 @@ Safety rules:
     interrupt routing. Any mismatch = abort with exit code 3, nothing written.
   * One instance at a time (lock in /run).
 
-Usage:  rn424_panel.py probe | test | run | sleep | wake
+Usage:  rn424_panel.py probe | test | run | sleep | wake | splash [l1 [l2]]
 Config: /etc/default/rn424-panel (see install.sh), or environment:
         RN_SLEEP=120   idle seconds before the display blanks (0 = never)
         RN_ROTATE=0    seconds between automatic page changes (0 = manual)
@@ -65,6 +65,7 @@ NORTH_BASE, SOUTH_BASE = 0xFDC20000, 0xFDC50000
 PADBAR = 0x400
 N, S = "N", "S"
 EXIT_UNSAFE = 3
+EXIT_BUSY = 4
 
 PROFILES = {
     "rn422_4": {
@@ -92,6 +93,10 @@ LOCKFILE = os.environ.get("RN_LOCK", "/run/rn424-panel.lock")
 
 class Unsafe(Exception):
     """A pre-flight check failed; nothing has been written to the hardware."""
+
+
+class Busy(Exception):
+    """Another instance holds the panel."""
 
 
 # ---------------------------------------------------------------- model check
@@ -214,15 +219,23 @@ def preflight(verbose=False):
 class InstanceLock:
     """Two bit-bangers at once would garble the display; allow only one."""
 
+    def __init__(self, wait=0.0):
+        self.wait = wait
+
     def __enter__(self):
         self.fd = os.open(LOCKFILE, os.O_RDWR | os.O_CREAT, 0o600)
-        try:
-            fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except OSError:
-            os.close(self.fd)
-            raise Unsafe("the panel is already in use (is the service "
-                         "running? stop it with: systemctl stop rn424-panel)")
-        return self
+        deadline = time.monotonic() + self.wait
+        while True:
+            try:
+                fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return self
+            except OSError:
+                if time.monotonic() >= deadline:
+                    os.close(self.fd)
+                    raise Busy("the panel is already in use (is the service "
+                               "running? stop it with: systemctl stop "
+                               "rn424-panel)")
+                time.sleep(0.5)
 
     def __exit__(self, *exc):
         os.close(self.fd)
@@ -667,13 +680,24 @@ def main():
     if os.geteuid() != 0 and DEVMEM == "/dev/mem":
         print("run as root", file=sys.stderr)
         return 1
-    if mode not in ("run", "test", "sleep", "wake"):
+    if mode not in ("run", "test", "sleep", "wake", "splash"):
         print(__doc__)
         return 1
+    wait = {"run": 30, "splash": 10}.get(mode, 0)
     try:
-        with InstanceLock():
+        with InstanceLock(wait):
             if mode == "run":
                 run()
+            elif mode == "splash":
+                # Early-boot message, replacing the BIOS "NETGEAR Storage /
+                # Welcome" frame until the main service takes over.
+                l1 = sys.argv[2] if len(sys.argv) > 2 else "Booting..."
+                l2 = sys.argv[3] if len(sys.argv) > 3 else \
+                    socket.gethostname()[:16]
+                _, _, pads = preflight()
+                lcd = LCD(pads)
+                lcd.init()
+                lcd.lines(l1, l2)
             elif mode == "test":
                 _, _, pads = preflight(verbose=True)
                 lcd = LCD(pads)
@@ -693,6 +717,9 @@ def main():
     except Unsafe as e:
         print("ABORTED, nothing written: %s" % e, file=sys.stderr)
         return EXIT_UNSAFE
+    except Busy as e:
+        print("BUSY: %s" % e, file=sys.stderr)
+        return EXIT_BUSY
     return 0
 
 

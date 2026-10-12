@@ -22,6 +22,10 @@ the RN426/RN428 pin map (selected automatically from the DMI model name).
 * The text shifts by a pixel every minute to limit burn-in.
 * If the buttons aren't available, pages rotate automatically and the display
   never sleeps.
+* At boot, a small early service (`rn424-panel-splash`) replaces the BIOS's
+  "NETGEAR Storage / Welcome" with "Booting… / <hostname>" a few seconds into
+  the Linux boot, until the main service starts. To shorten the GRUB pause
+  before Linux: `sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=2/' /etc/default/grub && update-grub`.
 
 ## Install
 
@@ -61,6 +65,7 @@ Logs: `journalctl -u rn424-panel -f`
 | `test` | Initialises the display and draws a test message. |
 | `run` | The service loop. |
 | `sleep` / `wake` | Turn the display off / on. |
+| `splash [line1] [line2]` | Show a message (used by the early-boot service). |
 
 `test`, `sleep` and `wake` refuse to run while the service is running (stop it
 first with `systemctl stop rn424-panel`).

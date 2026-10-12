@@ -78,6 +78,15 @@ including if you press Ctrl-C.
 
 On an RN424 the fan is `fan2`, driven by `pwm2`; the IT8613E has no `fan1`.
 
+Measured on the author's RN424 (stock fan):
+
+| Duty | 100 % | 75 % | 50 % (BIOS) | 31 % | 15 % | 9 % |
+|---|---|---|---|---|---|---|
+| rpm | 3000 | 2445 | 1875 | 1448 | 1090 | 949 |
+
+It never stopped, even at 9 %, so calibration chose the lowest allowed
+minimum, 40/255 (15 %).
+
 Run it again with `sh install.sh recalibrate`, for example after swapping the
 fan.
 

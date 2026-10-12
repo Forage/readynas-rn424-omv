@@ -50,7 +50,7 @@ module wouldn't load at all.)
 ## 2. Install
 
 ```
-git clone -b fan-control https://github.com/dgalue/readynas-rn424-omv /root/readynas-rn424-omv
+git clone https://github.com/dgalue/readynas-rn424-omv /root/readynas-rn424-omv
 sh /root/readynas-rn424-omv/fan/install.sh
 ```
 

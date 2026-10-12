@@ -303,7 +303,7 @@ Then a small service sets the fan from the disk and CPU temperatures. See
 [`fan/README.md`](fan/README.md) for the driver commands. After that:
 
 ```
-git clone -b fan-control https://github.com/dgalue/readynas-rn424-omv /root/readynas-rn424-omv
+git clone https://github.com/dgalue/readynas-rn424-omv /root/readynas-rn424-omv
 sh /root/readynas-rn424-omv/fan/install.sh     # checks, calibrates (~3 min), starts
 ```
 

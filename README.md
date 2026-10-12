@@ -23,7 +23,8 @@ front display and buttons work again.
 | OS | OpenMediaVault 8.3.1 (Debian 13), kernels 6.12 and 7.2 |
 | Boot device | 8 GB 9-pin USB DOM (HGST/STEC) on the internal header |
 | Data | Existing ReadyNAS OS 6 volume (mdadm + btrfs), mounted unchanged |
-| Front panel | Display and all five buttons working |
+| Front panel | Display and all five buttons working, boot message |
+| Fan | Temperature-controlled (IT8613E, community it87 driver via DKMS); BIOS 1875 rpm → 1090 rpm at idle |
 
 The RN422 shares the RN424's board and pin map and should work the same way,
 but hasn't been tested. The panel driver also carries the RN426/RN428 pin map.

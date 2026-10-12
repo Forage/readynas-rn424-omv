@@ -22,10 +22,16 @@ the RN426/RN428 pin map (selected automatically from the DMI model name).
 * The text shifts by a pixel every minute to limit burn-in.
 * If the buttons aren't available, pages rotate automatically and the display
   never sleeps.
-* At boot, a small early service (`rn424-panel-splash`) replaces the BIOS's
-  "NETGEAR Storage / Welcome" with "Booting… / <hostname>" a few seconds into
-  the Linux boot, until the main service starts. To shorten the GRUB pause
-  before Linux: `sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=2/' /etc/default/grub && update-grub`.
+* At power-on the BIOS writes "NETGEAR Storage / Welcome" to the display.
+  That can't be changed without modifying the BIOS. About 10 s into the
+  Linux boot, a small early service (`rn424-panel-splash`) replaces it with
+  "Booting… / <hostname>" until the main service starts. On a normal boot
+  the status pages follow 1–2 s later. The message mainly helps when the
+  network is slow to come up (no cable, for example): the main service waits
+  for the network, up to two minutes, and without the message the display
+  would show "Welcome" all that time.
+* Most of the "Welcome" time is the BIOS and the GRUB menu. To cut GRUB's
+  5 s wait to 1 s: `sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=1/' /etc/default/grub && update-grub`.
 
 ## Install
 
